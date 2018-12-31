@@ -34,7 +34,7 @@ CHAIN="-regtest"
 GENESIS_REWARD_PUBKEY=044e0d4bc823e20e14d66396a64960c993585400c53f1e6decb273f249bfeba0e71f140ffa7316f2cdaaae574e7d72620538c3e7791ae9861dfe84dd2955fc85e8
 
 # dont change the following variables unless you know what you are doing
-LITECOIN_BRANCH=0.14
+LITECOIN_BRANCH=0.16
 GENESISHZERO_REPOS=https://github.com/lhartikk/GenesisH0
 LITECOIN_REPOS=https://github.com/litecoin-project/litecoin.git
 LITECOIN_PUB_KEY=040184710fa689ad5023690c80f3a49c8f13f8d45b8c857fbcbc8bc4a8e4d3eb4b10f4d4604fa08dce601aaf0f470216fe1b51850b4acf21b179c45070ac7b03a9
@@ -42,10 +42,11 @@ LITECOIN_MERKLE_HASH=97ddfbbae6be97fd6cdf3e7ca13232a3afff2353e29badfab7f73011edd
 LITECOIN_MAIN_GENESIS_HASH=12a765e31ffd4059bada1e25190f6e98c99d9714d334efa41a195a7e7e04bfe2
 LITECOIN_TEST_GENESIS_HASH=4966625a4b2851d9fdee139e56211a0d88575f59ed816ff5e6a63deb4e3e29a0
 LITECOIN_REGTEST_GENESIS_HASH=530827f38f93b43ed12af0b3ad25a288dc02ed74d6d7857862df51fc56c416f9
-MINIMUM_CHAIN_WORK_MAIN=0x000000000000000000000000000000000000000000000006805c7318ce2736c0
-MINIMUM_CHAIN_WORK_TEST=0x000000000000000000000000000000000000000000000000000000054cb9e7a0
+MINIMUM_CHAIN_WORK_MAIN=0x0000000000000000000000000000000000000000000000c1bfe2bbe614f41260
+MINIMUM_CHAIN_WORK_TEST=0x000000000000000000000000000000000000000000000000001df7b5aa1700ce
 COIN_NAME_LOWER=$(echo $COIN_NAME | tr '[:upper:]' '[:lower:]')
 COIN_NAME_UPPER=$(echo $COIN_NAME | tr '[:lower:]' '[:upper:]')
+COIN_UNIT_LOWER=$(echo $COIN_UNIT | tr '[:upper:]' '[:lower:]')
 DIRNAME=$(dirname $0)
 DOCKER_NETWORK="172.18.0"
 DOCKER_IMAGE_LABEL="newcoin-env"
@@ -218,6 +219,8 @@ newcoin_replace_vars()
         $SED -i "s/LTC/$COIN_UNIT/g" $i
     done
 
+    $SED -i "s/ltc/$COIN_UNIT_LOWER/g" src/chainparams.cpp
+
     $SED -i "s/84000000/$TOTAL_SUPPLY/" src/amount.h
     $SED -i "s/1,48/1,$PUBKEY_CHAR/" src/chainparams.cpp
 
@@ -241,7 +244,7 @@ newcoin_replace_vars()
     $SED -i "0,/1296688602, 0/s//1296688602, $REGTEST_NONCE/" src/chainparams.cpp
     $SED -i "0,/0x1e0ffff0/s//$BITS/" src/chainparams.cpp
 
-    $SED -i "s,vSeeds.push_back,//vSeeds.push_back,g" src/chainparams.cpp
+    $SED -i "s,vSeeds.emplace_back,//vSeeds.emplace_back,g" src/chainparams.cpp
 
     if [ -n "$PREMINED_AMOUNT" ]; then
         $SED -i "s/CAmount nSubsidy = 50 \* COIN;/if \(nHeight == 1\) return COIN \* $PREMINED_AMOUNT;\n    CAmount nSubsidy = 50 \* COIN;/" src/validation.cpp
@@ -254,12 +257,37 @@ newcoin_replace_vars()
     $SED -i "s/$MINIMUM_CHAIN_WORK_TEST/0x00/" src/chainparams.cpp
 
     # change bip activation heights
+    # bip 16
+    $SED -i "s/218579/0/" src/chainparams.cpp
     # bip 34
     $SED -i "s/710000/0/" src/chainparams.cpp
+    $SED -i "s/fa09d204a83a768ed5a7c8d441fa62f2043abf420cff1226c7b4329aeb9d51cf/$MAIN_GENESIS_HASH/" src/chainparams.cpp
     # bip 65
     $SED -i "s/918684/0/" src/chainparams.cpp
     # bip 66
     $SED -i "s/811879/0/" src/chainparams.cpp
+
+    # testdummy
+    $SED -i "s/1199145601/Consensus::BIP9Deployment::ALWAYS_ACTIVE/g" src/chainparams.cpp
+    $SED -i "s/1230767999/Consensus::BIP9Deployment::NO_TIMEOUT/g" src/chainparams.cpp
+
+    $SED -i "s/1199145601/Consensus::BIP9Deployment::ALWAYS_ACTIVE/g" src/chainparams.cpp
+    $SED -i "s/1230767999/Consensus::BIP9Deployment::NO_TIMEOUT/g" src/chainparams.cpp
+
+    # csv
+    $SED -i "s/1485561600/Consensus::BIP9Deployment::ALWAYS_ACTIVE/g" src/chainparams.cpp
+    $SED -i "s/1517356801/Consensus::BIP9Deployment::NO_TIMEOUT/g" src/chainparams.cpp
+
+    $SED -i "s/1483228800/Consensus::BIP9Deployment::ALWAYS_ACTIVE/g" src/chainparams.cpp
+    $SED -i "s/1517356801/Consensus::BIP9Deployment::NO_TIMEOUT/g" src/chainparams.cpp
+
+    # segwit
+    $SED -i "s/1485561600/Consensus::BIP9Deployment::ALWAYS_ACTIVE/g" src/chainparams.cpp
+    # timeout of segwit is the same as csv
+
+    # defaultAssumeValid
+    $SED -i "s/0x66f49ad85624c33e4fd61aa45c54012509ed4a53308908dd07f56346c7939273/0x$MAIN_GENESIS_HASH/" src/chainparams.cpp
+    $SED -i "s/0x1efb29c8187d5a496a33377941d1df415169c3ce5d8c05d055f25b683ec3f9a3/0x$TEST_GENESIS_HASH/" src/chainparams.cpp
 
     # TODO: fix checkpoints
     popd
@@ -354,7 +382,7 @@ case $1 in
         docker_run_node 5 "cd /$COIN_NAME_LOWER ; ./src/${COIN_NAME_LOWER}d $CHAIN -listen -noconnect -bind=$DOCKER_NETWORK.5 -addnode=$DOCKER_NETWORK.1 -addnode=$DOCKER_NETWORK.2 -addnode=$DOCKER_NETWORK.3 -addnode=$DOCKER_NETWORK.4" &
 
         echo "Docker containers should be up and running now. You may run the following command to check the network status:
-for i in \$(docker ps -q); do docker exec \$i /$COIN_NAME_LOWER/src/${COIN_NAME_LOWER}-cli $CHAIN getinfo; done"
+for i in \$(docker ps -q); do docker exec \$i /$COIN_NAME_LOWER/src/${COIN_NAME_LOWER}-cli $CHAIN getblockchaininfo; done"
         echo "To ask the nodes to mine some blocks simply run:
 for i in \$(docker ps -q); do docker exec \$i /$COIN_NAME_LOWER/src/${COIN_NAME_LOWER}-cli $CHAIN generate 2  & done"
         exit 1
