@@ -14,13 +14,13 @@
 # CHAIN variable below
 
 # change the following variables to match your new coin
-COIN_NAME="MyCoin"
-COIN_UNIT="MYC"
+COIN_NAME="BeatCoin"
+COIN_UNIT="BTX"
 # 42 million coins at total (litecoin total supply is 84000000)
 TOTAL_SUPPLY=42000000
 MAINNET_PORT="54321"
 TESTNET_PORT="54322"
-PHRASE="Some newspaper headline that describes something that happened today"
+PHRASE="so today rush limbaugh died and that is sad"
 # First letter of the wallet address. Check https://en.bitcoin.it/wiki/Base58Check_encoding
 PUBKEY_CHAR="20"
 # number of blocks to wait to be able to spend coinbase UTXO's
@@ -31,7 +31,7 @@ CHAIN="-regtest"
 #PREMINED_AMOUNT=10000
 
 # warning: change this to your own pubkey to get the genesis block mining reward
-GENESIS_REWARD_PUBKEY=044e0d4bc823e20e14d66396a64960c993585400c53f1e6decb273f249bfeba0e71f140ffa7316f2cdaaae574e7d72620538c3e7791ae9861dfe84dd2955fc85e8
+GENESIS_REWARD_PUBKEY=046FEF5F556D4D96FC8402868657F770C1991BDC3C191D39E46E4CA994F113E3F0E5C5937BDFFCFE2A88858ED77446EAE939333191E791BE21FBF6213C2550A1F4
 
 # dont change the following variables unless you know what you are doing
 LITECOIN_BRANCH=0.16
